@@ -14,5 +14,5 @@ public class SaleDetailResponseDTO extends AuditResponseDTO {
     private double priceSale;
     private float quantity;
     private double total;
-    private int statusDetail;
+    private String statusDetail;
 }

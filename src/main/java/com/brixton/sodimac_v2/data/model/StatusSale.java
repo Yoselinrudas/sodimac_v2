@@ -4,11 +4,13 @@ import com.brixton.sodimac_v2.data.enums.StatusGroupType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "statussale")
 @Getter
 @Setter
+@ToString
 public class StatusSale extends Audit{
     @Id
     @Column(name = "id")

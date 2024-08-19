@@ -29,6 +29,7 @@ public interface SaleMapper {
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = "yyyy/MM/dd HH:mm")
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = "yyyy/MM/dd HH:mm")
     @Mapping(source = "product.id", target = "product")
+    @Mapping(source = "statusSale.description", target = "statusDetail")
     SaleDetailResponseDTO saleDetailToSaleDetailResponseDto(SaleDetail saleDetail);
 
 }
