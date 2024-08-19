@@ -36,7 +36,6 @@ public class SaleServiceImpl implements SaleService{
     @Autowired
     private StatusSaleRepository statusSaleRepository;
 
-    List<StatusSale> statusProformas = statusSaleRepository.findByStatusGroup(StatusGroupType.PROFORMA);
 
     public SaleServiceImpl(){
 
@@ -101,11 +100,16 @@ public class SaleServiceImpl implements SaleService{
         //proforma.setEmployee(employee);
 
         proformaRepository.save(proforma);
+        for(SaleDetail detail: details){
+            detail.setProforma(proforma);
+            saleDetailRepository.save(detail);
+        }
+        //details.stream().map(x -> x.setProforma(proforma))
 
         return SaleMapper.INSTANCE.proformaToProformaResponseDto(proforma);
     }
     private double getConfirmedQuantityForProduct(long productId) {
-
+        List<StatusSale> statusProformas = statusSaleRepository.findByStatusGroup(StatusGroupType.PROFORMA);
         // Filtrar las proformas confirmadas
         StatusSale confirmedStatus = statusProformas.stream()
                 .filter(status->status.getDescription().equals("CONFIRMED"))

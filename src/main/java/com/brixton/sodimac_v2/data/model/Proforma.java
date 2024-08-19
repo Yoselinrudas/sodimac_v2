@@ -23,7 +23,7 @@ public class Proforma extends Audit{
     private Employee employee;
 
     @ManyToOne
-    @JoinColumn(name = "statussale", foreignKey = @ForeignKey(name = "fk_proforma_statussale_id"))
+    @JoinColumn(name = "statussale_id", foreignKey = @ForeignKey(name = "fk_proforma_statussale_id"))
     private StatusSale statusSale;
 
     private float total;
