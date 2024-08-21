@@ -9,6 +9,7 @@ import com.brixton.sodimac_v2.dto.request.ProformaRequestDTO;
 import com.brixton.sodimac_v2.dto.request.UpdateProformaRequestDTO;
 import com.brixton.sodimac_v2.dto.response.ProformaResponseDTO;
 import com.brixton.sodimac_v2.service.mapper.SaleMapper;
+import jakarta.transaction.Transactional;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,30 +52,31 @@ public class SaleServiceImpl implements SaleService{
         proforma.setRegistryState(RegistryStateType.ACTIVE);
 
         //Obtiene empleado aociado
+        //buscra solo por area de venta
         Employee employee = employeeRepository.findById(proforma.getEmployee().getId()).orElseThrow(() -> new GenericNotFoundException(("Employee con Id no existente")));
-
+        //Verifica la disponibilidad del producto y establece el estado detalle
+        List<StatusSale> statusDetails = statusSaleRepository.findByStatusGroup(StatusGroupType.DETAIL);
         //Iniciar la lista de detalles de la proforma y total
-        List<SaleDetail> details = new ArrayList<>();
+        List<SaleDetail> detailToSaves = new ArrayList<>();
+        List<SaleDetail> detailToResponses = new ArrayList<>();
         log.info("employee: {}", employee);
         log.info("proforma: {}", proforma);
         float totalSum = 0;
         for(SaleDetail detail: proforma.getDetails()){
-            log.info("product: ");
-            Product product = productRepository.findById(detail.getProduct().getId()).orElseThrow(() -> new GenericNotFoundException(("Product con Id no existente")));;
-            log.info("product: {}", product);
+
+            Product product = productRepository.findById(detail.getProduct().getId())
+                    .orElseThrow(() -> new GenericNotFoundException(("Product con Id no existente")));;
+
             //calcular la cantidad  disponible
             double availableQuantity = product.getQuantity() - getConfirmedQuantityForProduct(product.getId()) - detail.getQuantity();
             //crea nuevo detalle de venta
-            SaleDetail proformaDetail = new SaleDetail();
-            proformaDetail.setProduct(product);
-            proformaDetail.setQuantity(detail.getQuantity());
-            proformaDetail.setPriceSale(product.getPriceSale());
-            proformaDetail.setTotal(product.getPriceSale() * detail.getQuantity());
+            //SaleDetail proformaDetail = new SaleDetail();
+            detail.setProduct(product);
+            //detail.setQuantity(detail.getQuantity());
+            detail.setPriceSale(product.getPriceSale());
+            detail.setTotal(product.getPriceSale() * detail.getQuantity());
 
-            //Verifica la disponibilidad del producto y establece el estado detalle
-            log.info(StatusGroupType.DETAIL.name());
-            log.info(StatusGroupType.DETAIL.name());
-            List<StatusSale> statusDetails = statusSaleRepository.findByStatusGroup(StatusGroupType.DETAIL);
+            detailToResponses.add(detail);
             log.info("cantidad disponible: {}", availableQuantity);
             if(availableQuantity >= 0){
               StatusSale availableStatus = statusDetails.stream()
@@ -82,30 +84,27 @@ public class SaleServiceImpl implements SaleService{
                       .findFirst()
                       .orElseThrow(() -> new IllegalArgumentException(("Status 'AVAILABLE' not found")));
               log.info("available status:{}", availableStatus);
-              proformaDetail.setStatusSale(availableStatus);
-              totalSum += proformaDetail.getTotal();
+              detail.setStatusSale(availableStatus);
+              totalSum += detail.getTotal();
+              detailToSaves.add(detail);
             }else{
                 StatusSale outOfStockStatus = statusDetails.stream()
                         .filter(status -> status.getStatusGroup() == StatusGroupType.DETAIL && status.getDescription().equals("OUT_OF_STOCK"))
                         .findFirst()
                         .orElseThrow(()-> new IllegalArgumentException("Status 'OUT_OF_STOCK' not found"));
                 log.info("available status:{}", outOfStockStatus);
-                proformaDetail.setStatusSale(outOfStockStatus);
+                detail.setStatusSale(outOfStockStatus);
             }
-            details.add(proformaDetail);
         }
-
-        proforma.setDetails(details);
         proforma.setTotal(totalSum);
         //proforma.setEmployee(employee);
-
         proformaRepository.save(proforma);
-        for(SaleDetail detail: details){
+
+        for(SaleDetail detail: detailToSaves){
             detail.setProforma(proforma);
             saleDetailRepository.save(detail);
         }
-        //details.stream().map(x -> x.setProforma(proforma))
-
+        proforma.setDetails(detailToResponses);
         return SaleMapper.INSTANCE.proformaToProformaResponseDto(proforma);
     }
     private double getConfirmedQuantityForProduct(long productId) {
@@ -121,13 +120,16 @@ public class SaleServiceImpl implements SaleService{
         return confirmedQuantity != null ? confirmedQuantity:0;
     }
 
+    @Transactional
     @Override
-    public ProformaResponseDTO getProforma(long id, ProformaRequestDTO proforma) {
-        return null;
+    public ProformaResponseDTO getProforma(long id) {
+        Proforma proformaFound = proformaRepository.findById(id).orElseThrow(() -> new GenericNotFoundException("Proforma con Id no existente"));
+        //proformaFound.getDetails().size();
+        return SaleMapper.INSTANCE.proformaToProformaResponseDto(proformaFound);
     }
 
-    @Override
+    /*@Override
     public ProformaResponseDTO updateProforma(long id, UpdateProformaRequestDTO proformaDTO) {
         return null;
-    }
+    }*/
 }

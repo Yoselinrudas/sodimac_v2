@@ -7,10 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProformaRepository extends JpaRepository<Proforma,Long> {
 
     List<Proforma> findAllByStatusSale(StatusSale statusSale);
+
     //consulta directa y que no permita una consulta perezosa con transaccional
     @Query("SELECT SUM(detail.quantity) FROM Proforma p " +
             "JOIN p.details detail " +

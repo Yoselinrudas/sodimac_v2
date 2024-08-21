@@ -9,6 +9,6 @@ import java.util.List;
 public interface StatusSaleRepository extends JpaRepository<StatusSale, Integer> {
 
     List<StatusSale> findByStatusGroup(StatusGroupType statusGroup);
-
+    List<StatusSale> findByDescription(String description);
 
 }
