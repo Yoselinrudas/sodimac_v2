@@ -6,7 +6,6 @@ import com.brixton.sodimac_v2.data.enums.StatusGroupType;
 import com.brixton.sodimac_v2.data.model.*;
 import com.brixton.sodimac_v2.data.repository.*;
 import com.brixton.sodimac_v2.dto.request.ProformaRequestDTO;
-import com.brixton.sodimac_v2.dto.request.UpdateProformaRequestDTO;
 import com.brixton.sodimac_v2.dto.response.ProformaResponseDTO;
 import com.brixton.sodimac_v2.service.mapper.SaleMapper;
 import jakarta.transaction.Transactional;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -51,8 +51,6 @@ public class SaleServiceImpl implements SaleService{
         proforma.setCreatedBy(USER_APP);
         proforma.setRegistryState(RegistryStateType.ACTIVE);
 
-        //Obtiene empleado aociado
-        //buscra solo por area de venta
         Employee employee = employeeRepository.findById(proforma.getEmployee().getId()).orElseThrow(() -> new GenericNotFoundException(("Employee con Id no existente")));
         //Verifica la disponibilidad del producto y establece el estado detalle
         List<StatusSale> statusDetails = statusSaleRepository.findByStatusGroup(StatusGroupType.DETAIL);
@@ -124,12 +122,75 @@ public class SaleServiceImpl implements SaleService{
     @Override
     public ProformaResponseDTO getProforma(long id) {
         Proforma proformaFound = proformaRepository.findById(id).orElseThrow(() -> new GenericNotFoundException("Proforma con Id no existente"));
-        //proformaFound.getDetails().size();
         return SaleMapper.INSTANCE.proformaToProformaResponseDto(proformaFound);
     }
 
-    /*@Override
-    public ProformaResponseDTO updateProforma(long id, UpdateProformaRequestDTO proformaDTO) {
-        return null;
-    }*/
+    @Transactional
+    @Override
+    public ProformaResponseDTO updateProforma(long id, ProformaRequestDTO proformaDTO) {
+        Proforma original = proformaRepository.findById(id).orElseThrow(() -> new GenericNotFoundException(("Proforma con Id no existente")));
+        Proforma proformaTemp = SaleMapper.INSTANCE.proformaRequestDtoToProforma(proformaDTO);
+
+        original.setUpdatedAt(LocalDateTime.now());
+        original.setUpdatedBy(USER_APP);
+        original.setEmployee(proformaTemp.getEmployee());
+        original.setStatusSale(proformaTemp.getStatusSale());
+
+        //Eliminar detalle de bd
+        saleDetailRepository.deleteAll(original.getDetails());
+        original.getDetails().clear();
+
+        List<StatusSale> statusDetails = statusSaleRepository.findByStatusGroup(StatusGroupType.DETAIL);
+        //Iniciar la lista de detalles de la proforma y total
+        List<SaleDetail> detailToSaves = new ArrayList<>();
+        List<SaleDetail> detailToResponses = new ArrayList<>();
+
+        float totalSum = 0;
+        for(SaleDetail detail: proformaTemp.getDetails()){
+
+            Product product = productRepository.findById(detail.getProduct().getId())
+                    .orElseThrow(() -> new GenericNotFoundException(("Product con Id no existente")));;
+
+            //calcular la cantidad  disponible
+            double availableQuantity = product.getQuantity() - getConfirmedQuantityForProduct(product.getId()) - detail.getQuantity();
+            //crea nuevo detalle de venta
+            //SaleDetail proformaDetail = new SaleDetail();
+            detail.setProduct(product);
+            //detail.setQuantity(detail.getQuantity());
+            detail.setPriceSale(product.getPriceSale());
+            detail.setTotal(product.getPriceSale() * detail.getQuantity());
+
+            detailToResponses.add(detail);
+            log.info("cantidad disponible: {}", availableQuantity);
+            if(availableQuantity >= 0){
+              StatusSale availableStatus = statusDetails.stream()
+                      .filter(status -> status.getStatusGroup() == StatusGroupType.DETAIL && status.getDescription().equals("AVAILABLE"))
+                      .findFirst()
+                      .orElseThrow(() -> new IllegalArgumentException(("Status 'AVAILABLE' not found")));
+              log.info("available status:{}", availableStatus);
+              detail.setStatusSale(availableStatus);
+              totalSum += detail.getTotal();
+              detailToSaves.add(detail);
+            }else{
+                StatusSale outOfStockStatus = statusDetails.stream()
+                        .filter(status -> status.getStatusGroup() == StatusGroupType.DETAIL && status.getDescription().equals("OUT_OF_STOCK"))
+                        .findFirst()
+                        .orElseThrow(()-> new IllegalArgumentException("Status 'OUT_OF_STOCK' not found"));
+                log.info("available status:{}", outOfStockStatus);
+                detail.setStatusSale(outOfStockStatus);
+            }
+        }
+        original.setTotal(totalSum);
+        //proforma.setEmployee(employee);
+        proformaRepository.save(original);
+
+        for(SaleDetail detail: detailToSaves){
+            detail.setProforma(original);
+            saleDetailRepository.save(detail);
+        }
+        original.setDetails(detailToResponses);
+
+        proformaRepository.save(original);
+        return SaleMapper.INSTANCE.proformaToProformaResponseDto(original);
+    }
 }

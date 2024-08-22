@@ -29,5 +29,8 @@ public class SaleController {
         return ResponseEntity.ok(saleService.getProforma(id));
     }
 
-    //ProformaResponseDTO updateProforma(long id, UpdateProformaRequestDTO proformaDTO);*/
+    @PutMapping("/{id}")
+    public ResponseEntity<ProformaResponseDTO> updateProforma(@Valid @PathVariable long id, @RequestBody ProformaRequestDTO proformaDTO){
+        return ResponseEntity.ok(saleService.updateProforma(id, proformaDTO));
+    }
 }
