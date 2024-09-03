@@ -41,4 +41,10 @@ public class GlobalExceptionHandler {
         log.error("GenericNotFoundException: {}", ex.getMessage());
         return new ResponseEntity<>("", HttpStatus.NOT_FOUND);
     }
+
+   @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<?> handleUnauthorizedException(UnauthorizedException ex) {
+        log.error("NotAuthorizedException: {}", ex.getMessage());
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
 }

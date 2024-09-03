@@ -1,8 +1,12 @@
 package com.brixton.sodimac_v2.data.controller;
 
+import com.brixton.sodimac_v2.dto.request.BillRequestDTO;
 import com.brixton.sodimac_v2.dto.request.ProformaRequestDTO;
+import com.brixton.sodimac_v2.dto.request.TicketRequestDTO;
 import com.brixton.sodimac_v2.dto.request.UpdateProformaRequestDTO;
+import com.brixton.sodimac_v2.dto.response.BillResponseDTO;
 import com.brixton.sodimac_v2.dto.response.ProformaResponseDTO;
+import com.brixton.sodimac_v2.dto.response.TicketResponseDTO;
 import com.brixton.sodimac_v2.service.SaleService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +33,30 @@ public class SaleController {
         return ResponseEntity.ok(saleService.getProforma(id));
     }
 
-    @PutMapping("/{id}")
+   /* @PutMapping("/{id}")
     public ResponseEntity<ProformaResponseDTO> updateProforma(@Valid @PathVariable long id, @RequestBody ProformaRequestDTO proformaDTO){
         return ResponseEntity.ok(saleService.updateProforma(id, proformaDTO));
+    }*/
+
+    @PostMapping("/confirmTicket")
+    public ResponseEntity<TicketResponseDTO> confirmSaleTicket(@RequestBody TicketRequestDTO confirmedTicket){
+        TicketResponseDTO ticket = saleService.confirmSaleTicket(confirmedTicket);
+        return ResponseEntity.ok(ticket);
+    }
+
+    @GetMapping("/ticket/{id}")
+    public ResponseEntity<TicketResponseDTO> getTicket(@PathVariable long id){
+        return null;
+    }
+
+    @PostMapping("/confirmBill")
+    ResponseEntity<BillResponseDTO> confirmSaleBill(@RequestBody BillRequestDTO confirmedBill){
+        BillResponseDTO bill = saleService.confirmSaleBill(confirmedBill);
+        return ResponseEntity.ok(bill);
+    }
+
+    @GetMapping("/Bill/{id}")
+    ResponseEntity<BillResponseDTO> getBill(@PathVariable long id){
+        return null;
     }
 }

@@ -1,6 +1,8 @@
 package com.brixton.sodimac_v2.data.model;
 
 
+import com.brixton.sodimac_v2.data.model.enums.RegistryProformaType;
+import com.brixton.sodimac_v2.data.model.enums.RegistryStateType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,4 +31,12 @@ public class Proforma extends Audit{
     private float total;
     @OneToMany(mappedBy = "proforma")
     private List<SaleDetail> details;
+
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "used")
+    private RegistryProformaType registryProforma;
+
+
+
+
 }

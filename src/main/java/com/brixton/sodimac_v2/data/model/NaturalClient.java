@@ -1,6 +1,6 @@
 package com.brixton.sodimac_v2.data.model;
 
-import com.brixton.sodimac_v2.data.enums.TypeDocument;
+import com.brixton.sodimac_v2.data.model.enums.TypeDocument;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

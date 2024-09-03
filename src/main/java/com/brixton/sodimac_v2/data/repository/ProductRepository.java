@@ -1,6 +1,6 @@
 package com.brixton.sodimac_v2.data.repository;
 
-import com.brixton.sodimac_v2.data.enums.RegistryStateType;
+import com.brixton.sodimac_v2.data.model.enums.RegistryStateType;
 import com.brixton.sodimac_v2.data.model.Category;
 import com.brixton.sodimac_v2.data.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;

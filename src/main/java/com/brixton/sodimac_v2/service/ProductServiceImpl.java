@@ -2,7 +2,7 @@ package com.brixton.sodimac_v2.service;
 
 
 import com.brixton.sodimac_v2.data.controller.GenericNotFoundException;
-import com.brixton.sodimac_v2.data.enums.RegistryStateType;
+import com.brixton.sodimac_v2.data.model.enums.RegistryStateType;
 import com.brixton.sodimac_v2.data.model.Category;
 import com.brixton.sodimac_v2.data.model.Product;
 import com.brixton.sodimac_v2.data.repository.CategoryRepository;

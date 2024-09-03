@@ -1,6 +1,6 @@
 package com.brixton.sodimac_v2.data.model;
 
-import com.brixton.sodimac_v2.data.enums.RegistryStateType;
+import com.brixton.sodimac_v2.data.model.enums.RegistryStateType;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

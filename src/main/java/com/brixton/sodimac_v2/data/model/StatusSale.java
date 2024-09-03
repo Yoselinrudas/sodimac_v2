@@ -1,6 +1,6 @@
 package com.brixton.sodimac_v2.data.model;
 
-import com.brixton.sodimac_v2.data.enums.StatusGroupType;
+import com.brixton.sodimac_v2.data.model.enums.StatusGroupType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

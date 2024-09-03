@@ -1,4 +1,4 @@
-package com.brixton.sodimac_v2.data.enums;
+package com.brixton.sodimac_v2.data.model.enums;
 
 public enum RegistryStateType {
 
