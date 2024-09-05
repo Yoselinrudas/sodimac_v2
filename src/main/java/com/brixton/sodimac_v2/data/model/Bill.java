@@ -1,8 +1,10 @@
 package com.brixton.sodimac_v2.data.model;
 
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 
 @Entity
 @Getter
@@ -21,7 +23,8 @@ public class Bill extends Audit{
     @JoinColumn(name = "proforma_id", foreignKey = @ForeignKey(name = "fk_bill_proforma_id"))
     private Proforma proforma;
 
+    private double total;
     private double subtotal;
     private double igv;
-    private double total;
+
 }

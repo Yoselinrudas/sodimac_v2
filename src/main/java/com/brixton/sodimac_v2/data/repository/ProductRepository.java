@@ -11,4 +11,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByRegistryState(RegistryStateType registryState);
     List<Product> findByCategory(Category category);
+    List<Product> findByQuantity(float quantity);
 }

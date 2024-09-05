@@ -3,7 +3,6 @@ package com.brixton.sodimac_v2.service;
 import com.brixton.sodimac_v2.data.controller.GenericNotFoundException;
 import com.brixton.sodimac_v2.data.controller.UnauthorizedException;
 import com.brixton.sodimac_v2.data.model.enums.RegistryProformaType;
-import com.brixton.sodimac_v2.data.model.enums.RegistryStateType;
 import com.brixton.sodimac_v2.data.model.enums.StatusGroupType;
 import com.brixton.sodimac_v2.data.model.*;
 import com.brixton.sodimac_v2.data.repository.*;
@@ -14,9 +13,9 @@ import com.brixton.sodimac_v2.dto.response.BillResponseDTO;
 import com.brixton.sodimac_v2.dto.response.ProformaResponseDTO;
 import com.brixton.sodimac_v2.dto.response.SaleDetailResponseDTO;
 import com.brixton.sodimac_v2.dto.response.TicketResponseDTO;
+import com.brixton.sodimac_v2.service.mapper.ClientMapper;
 import com.brixton.sodimac_v2.service.mapper.SaleMapper;
 import com.brixton.sodimac_v2.service.utils.Constantes;
-import jakarta.transaction.Transactional;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +27,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.brixton.sodimac_v2.service.utils.FuntionalBusinessInterfaces.auditCreation;
+import static com.brixton.sodimac_v2.service.utils.FuntionalBusinessInterfaces.business;
 
 @Service
 @Slf4j
 @ToString
 public class SaleServiceImpl implements SaleService{
 
-    private static final String RAZON_SOCIAL = "SODIMAC PERU SA";
-    private static final String RUC = "20389230724";
-    private static final String ADDRESS = "Av. La Marina 1232 San Miguel / Lima / Peru";
+
 
     @Autowired
     private ProformaRepository proformaRepository;
@@ -57,7 +55,6 @@ public class SaleServiceImpl implements SaleService{
     @Autowired
     private  BillRepository billRepository;
 
-
     public SaleServiceImpl(){
 
     }
@@ -77,6 +74,8 @@ public class SaleServiceImpl implements SaleService{
         }
         //Verifica la disponibilidad del producto y establece el estado detalle
         List<StatusSale> statusDetails = statusSaleRepository.findByStatusGroup(StatusGroupType.DETAIL);
+        StatusSale statusSaleProforma = statusSaleRepository.findByIdAndStatusGroup(proforma.getStatusSale().getId(), StatusGroupType.PROFORMA).orElseThrow(() -> new GenericNotFoundException(("findByIdAndStatusGroup no existente")));
+        proforma.setStatusSale(statusSaleProforma);
         //Iniciar la lista de detalles de la proforma y total
         List<SaleDetail> detailToSaves = new ArrayList<>();
         List<SaleDetail> detailToResponses = new ArrayList<>();
@@ -90,14 +89,12 @@ public class SaleServiceImpl implements SaleService{
 
             //calcular la cantidad  disponible
             double availableQuantity = product.getQuantity() - getConfirmedQuantityForProduct(product.getId()) - detail.getQuantity();
-            //crea nuevo detalle de venta
-            //SaleDetail proformaDetail = new SaleDetail();
+
             detail.setProduct(product);
-            //detail.setQuantity(detail.getQuantity());
             detail.setPriceSale(product.getPriceSale());
             detail.setTotal(product.getPriceSale() * detail.getQuantity());
-
             detailToResponses.add(detail);
+
             log.info("cantidad disponible: {}", availableQuantity);
             if(availableQuantity >= 0){
                 StatusSale availableStatus = statusDetails.stream()
@@ -118,14 +115,22 @@ public class SaleServiceImpl implements SaleService{
             }
         }
         proforma.setTotal(totalSum);
-        //proforma.setEmployee(employee);
-        proformaRepository.save(proforma);
+       // Filtrar por estado de la proforma
+        if ("CONFIRMED".equalsIgnoreCase(proforma.getStatusSale().getDescription())) {
+            // Guardar en la base de datos si la proforma está confirmada
+            proformaRepository.save(proforma);
 
-        for(SaleDetail detail: detailToSaves){
-            detail.setProforma(proforma);
-            saleDetailRepository.save(detail);
+            for (SaleDetail detail : detailToSaves) {
+                detail.setProforma(proforma);
+                saleDetailRepository.save(detail);
+            }
+            proforma.setDetails(detailToResponses);
+        } else {
+            // Si la proforma es temporal, solo mostrar los datos
+            log.info("La proforma tiene un estado TEMPORAL");
+            proforma.setDetails(detailToResponses);
         }
-        proforma.setDetails(detailToResponses);
+
         return SaleMapper.INSTANCE.proformaToProformaResponseDto(proforma);
     }
     private double getConfirmedQuantityForProduct(long productId) {
@@ -141,7 +146,6 @@ public class SaleServiceImpl implements SaleService{
         return confirmedQuantity != null ? confirmedQuantity:0;
     }
 
-    //@Transactional
     @Override
     public ProformaResponseDTO getProforma(long id) {
         Proforma proformaFound = proformaRepository.findByIdWithDetails(id)
@@ -152,8 +156,21 @@ public class SaleServiceImpl implements SaleService{
     @Override
     public TicketResponseDTO confirmSaleTicket(TicketRequestDTO confirmedTicket) {
 
-        Proforma confirmedProforma = proformaRepository.findByIdWithDetails(confirmedTicket.getProformaId()).orElseThrow(() -> new GenericNotFoundException("Proforma con Id no existente"));
-        NaturalClient client = naturalClientRepository.findById(confirmedTicket.getClient().getNumber()).orElseThrow(() -> new GenericNotFoundException("Cliente con Id no existente"));
+        Proforma confirmedProforma = proformaRepository.findByIdWithDetails(confirmedTicket.getProformaId())
+                .orElseThrow(() -> new GenericNotFoundException("Proforma con Id no existente"));
+
+        // Verificar si la proforma ya ha sido usada
+        if (confirmedProforma.getRegistryProforma() == RegistryProformaType.USED) {
+            throw new IllegalStateException("La proforma ya ha sido utilizada y no se puede volver a procesar.");
+        }
+
+        NaturalClient client = naturalClientRepository.findById(confirmedTicket.getClient().getNumber()).orElseGet(() -> {
+            NaturalClient newClient = ClientMapper.INSTANCE.naturalClientRequestDtoToNaturalClient(confirmedTicket.getClient());
+        newClient.setDocumentNumber(confirmedTicket.getClient().getNumber());
+        auditCreation.accept(newClient);
+        return naturalClientRepository.save(newClient);
+        });
+
         Ticket ticket = SaleMapper.INSTANCE.ticketRequestDtoToTicket(confirmedTicket);
         auditCreation.accept(ticket);
         ticket.setNaturalClient(client);
@@ -175,9 +192,7 @@ public class SaleServiceImpl implements SaleService{
 
         TicketResponseDTO ticketResponseDTO = SaleMapper.INSTANCE.ticketToTicketResponseDto(ticket);
 
-        ticketResponseDTO.setAddress(ADDRESS);
-        ticketResponseDTO.setRazonSocialBusiness(RAZON_SOCIAL);
-        ticketResponseDTO.setRucBusiness(RUC);
+        business.accept(ticketResponseDTO);
         ticketResponseDTO.setTotal(totalSum);
         List<SaleDetailResponseDTO> saleDetailResponses = confirmedProforma.getDetails().stream()
                 .map(SaleMapper.INSTANCE::saleDetailToSaleDetailResponseDto)
@@ -190,21 +205,35 @@ public class SaleServiceImpl implements SaleService{
 
     @Override
     public TicketResponseDTO getTicket(long id) {
-        return null;
+
+        Ticket ticketFound = ticketRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new GenericNotFoundException("Ticket con Id no existente"));
+        TicketResponseDTO ticket = SaleMapper.INSTANCE.ticketToTicketResponseDto(ticketFound);
+        business.accept(ticket);
+        return ticket;
     }
 
     @Override
     public BillResponseDTO confirmSaleBill(BillRequestDTO confirmedBill) {
 
         Proforma confirmedProforma = proformaRepository.findByIdWithDetails(confirmedBill.getProformaId()).orElseThrow(() -> new GenericNotFoundException("Proforma con Id no existente"));
-        LegalClient client = legalClientRepository.findById(confirmedBill.getClient().getRuc()).orElseThrow(() -> new GenericNotFoundException("Cliente con Id no existente"));
+        // Verificar si la proforma ya ha sido usada
+        if (confirmedProforma.getRegistryProforma() == RegistryProformaType.USED) {
+            throw new IllegalStateException("La proforma ya ha sido utilizada y no se puede volver a procesar.");
+        }
+
+        LegalClient client = legalClientRepository.findById(confirmedBill.getClient().getRuc())
+                .orElseGet(() -> {
+                    LegalClient newClient = ClientMapper.INSTANCE.legalClientRequestDtoToLegalClient(confirmedBill.getClient());
+                    newClient.setRuc(confirmedBill.getClient().getRuc());
+                    auditCreation.accept(newClient);
+                    return legalClientRepository.save(newClient);
+                });
 
         Bill bill = SaleMapper.INSTANCE.billRequestDtoToBill(confirmedBill);
         auditCreation.accept(bill);
         bill.setLegalClient(client);
         bill.setProforma(confirmedProforma);
-
-
 
         double subTotal= confirmedProforma.getDetails().stream()
                 .mapToDouble(SaleDetail::getTotal)
@@ -216,6 +245,7 @@ public class SaleServiceImpl implements SaleService{
 
         bill = billRepository.save(bill);
 
+
         for(SaleDetail detail: confirmedProforma.getDetails()){
             Product productUpdated = detail.getProduct();
             productUpdated.setQuantity(productUpdated.getQuantity() - detail.getQuantity());
@@ -226,9 +256,8 @@ public class SaleServiceImpl implements SaleService{
         proformaRepository.save(confirmedProforma);
 
         BillResponseDTO billResponseDTO = SaleMapper.INSTANCE.billToBillResponseDto(bill);
-        billResponseDTO.setAddressBusiness(ADDRESS);
-        billResponseDTO.setRazonSocialBusiness(RAZON_SOCIAL);
-        billResponseDTO.setRucBusiness(RUC);
+        business.accept(billResponseDTO);
+
         List<SaleDetailResponseDTO> saleDetailResponses = confirmedProforma.getDetails().stream()
                 .map(SaleMapper.INSTANCE::saleDetailToSaleDetailResponseDto)
                 .collect(Collectors.toList());
@@ -241,7 +270,12 @@ public class SaleServiceImpl implements SaleService{
 
     @Override
     public BillResponseDTO getBill(long id) {
-        return null;
+
+        Bill billFound = billRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new GenericNotFoundException("Bill con Id no existente"));
+        BillResponseDTO bill = SaleMapper.INSTANCE.billToBillResponseDto(billFound);
+        business.accept(bill);
+        return bill;
     }
 
 

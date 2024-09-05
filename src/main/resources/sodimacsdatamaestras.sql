@@ -74,6 +74,16 @@ INSERT  INTO `typedocument`(`id`,`document`,`createdat`,`createdby`,`updatedat`,
 (1,'DNI',NOW(),'BRIXTON',NULL,NULL,1),
 (2,'PASSAPORTE',NOW(),'BRIXTON',NULL,NULL,1);
 
+/*Data for the table `typemovement` */
+
+INSERT INTO `typemovement` (`id`, `subType`, `statusMovement`, `createdAt`, `createdBy`, `registry_state`) VALUES 
+(10, 'SALE', 'OUTPUT', NOW(), 'BRIXTON', 1);
+(11, 'SALE', 'OUTPUT', NOW(), 'BRIXTON', 1); 
+(12, 'MOVEMENT_BRANCH', 'OUTPUT', NOW(), 'BRIXTON', 1); 
+(20, 'CANCELED', 'INPUT', NOW(), 'BRIXTON', 1); 
+(21, 'BUY', 'INPUT', NOW(), 'BRIXTON', '1'); 
+(22, 'MOVEMENT_BRANCH', 'INPUT', NOW(), 'BRIXTON', 1); 
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;

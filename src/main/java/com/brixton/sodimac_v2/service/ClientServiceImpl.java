@@ -20,12 +20,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.brixton.sodimac_v2.service.utils.FuntionalBusinessInterfaces.auditCreation;
+import static com.brixton.sodimac_v2.service.utils.FuntionalBusinessInterfaces.auditUpdate;
+
 @Service
 @Slf4j
 @ToString
 public class ClientServiceImpl implements ClientService{
 
-    private static final String USER_APP = "BRIXTON";
 
     @Autowired
     private NaturalClientRepository naturalClientRepository;
@@ -41,9 +43,7 @@ public class ClientServiceImpl implements ClientService{
     public NaturalClientResponseDTO createNaturalClient(NaturalClientRequestDTO inputClient) {
         NaturalClient client = ClientMapper.INSTANCE.naturalClientRequestDtoToNaturalClient(inputClient);
         client.setDocumentNumber(inputClient.getNumber());
-        client.setCreatedAt(LocalDateTime.now());
-        client.setCreatedBy(USER_APP);
-        client.setRegistryState(RegistryStateType.ACTIVE);
+        auditCreation.accept(client);
         log.info(client.toString());
         naturalClientRepository.save(client);
         NaturalClientResponseDTO naturalClientResponseDTO = ClientMapper.INSTANCE.naturalClientToNaturalClientResponseDto(client);
@@ -55,9 +55,7 @@ public class ClientServiceImpl implements ClientService{
     public LegalClientResponseDTO createLegalClient(LegalClientRequestDTO inputClient) {
         LegalClient client = ClientMapper.INSTANCE.legalClientRequestDtoToLegalClient(inputClient);
         //client.setRuc(inputClient.getRuc());
-        client.setCreatedAt(LocalDateTime.now());
-        client.setCreatedBy(USER_APP);
-        client.setRegistryState(RegistryStateType.ACTIVE);
+        auditCreation.accept(client);
         legalClientRepository.save(client);
         LegalClientResponseDTO legalClientResponseDTO = ClientMapper.INSTANCE.legalClientToLegalClientResponseDto(client);
         log.info("LegalClient: {}", legalClientResponseDTO);
@@ -101,8 +99,7 @@ public class ClientServiceImpl implements ClientService{
         original.setAddress(clientTemp.getAddress());
         original.setPhone(clientTemp.getPhone());
         original.setEmail(clientTemp.getEmail());
-        original.setUpdatedAt(LocalDateTime.now());
-        original.setUpdatedBy(USER_APP);
+        auditUpdate.accept(original);
         naturalClientRepository.save(original);
         return ClientMapper.INSTANCE.naturalClientToNaturalClientResponseDto(original);
     }
@@ -117,8 +114,7 @@ public class ClientServiceImpl implements ClientService{
         original.setPhone(clientTemp.getPhone());
         original.setEmail(clientTemp.getEmail());
         original.setSupplier(clientTemp.isSupplier());
-        original.setUpdatedAt(LocalDateTime.now());
-        original.setUpdatedBy(USER_APP);
+        auditUpdate.accept(original);
         legalClientRepository.save(original);
         return ClientMapper.INSTANCE.legalClientToLegalClientResponseDto(original);
     }
@@ -159,8 +155,7 @@ public class ClientServiceImpl implements ClientService{
     public void deleteNaturalClient(String numberDoc) {
         NaturalClient clientFound = naturalClientRepository.findById(numberDoc).orElseThrow(()-> new GenericNotFoundException("Cliente con documento no identificado"));
         clientFound.setRegistryState(RegistryStateType.INACTIVE);
-        clientFound.setUpdatedBy(USER_APP);
-        clientFound.setUpdatedAt(LocalDateTime.now());
+        auditUpdate.accept(clientFound);
         naturalClientRepository.save(clientFound);
     }
 
@@ -168,8 +163,7 @@ public class ClientServiceImpl implements ClientService{
     public void deleteLegalClient(String ruc) {
         LegalClient clientFound = legalClientRepository.findById(ruc).orElseThrow(()-> new GenericNotFoundException("Cliente con ruc no identificado"));
         clientFound.setRegistryState(RegistryStateType.INACTIVE);
-        clientFound.setUpdatedBy(USER_APP);
-        clientFound.setUpdatedAt(LocalDateTime.now());
+        auditUpdate.accept(clientFound);
         legalClientRepository.save(clientFound);
     }
 }

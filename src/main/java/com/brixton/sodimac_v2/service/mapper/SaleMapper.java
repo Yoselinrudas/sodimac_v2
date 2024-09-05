@@ -41,6 +41,8 @@ public interface SaleMapper {
     @Mapping(source = "legalClient", target = "client")
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = "yyyy/MM/dd HH:mm")
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = "yyyy/MM/dd HH:mm")
+    @Mapping(source = "proforma.details", target = "salesDetails")
+    @Mapping(source = "id", target = "id")
     BillResponseDTO billToBillResponseDto(Bill bill);
     //@Mapping(source = "proformaId", target = "proforma")
     @Mapping(source = "client",target = "naturalClient")
@@ -48,6 +50,9 @@ public interface SaleMapper {
     @Mapping(source = "naturalClient", target = "client")
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = "yyyy/MM/dd HH:mm")
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = "yyyy/MM/dd HH:mm")
+    @Mapping(source = "proforma.details", target = "saleDetails")
+    @Mapping(source = "proforma.total", target = "total")
+    @Mapping(source = "id", target = "id")
     TicketResponseDTO ticketToTicketResponseDto(Ticket ticket);
 
 

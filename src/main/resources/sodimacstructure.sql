@@ -346,6 +346,7 @@ CREATE TABLE `proforma` (
   `updatedat` DATETIME DEFAULT NULL,
   `updatedby` VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
   `registry_state` TINYINT DEFAULT NULL COMMENT '0=INACTIVE, 1=ACTIVE',
+  `used` TINYINT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_employee_proforma` (`employee_id`),
   KEY `FK_proforma` (`registry_state`),
@@ -447,6 +448,17 @@ CREATE TABLE `typedocument` (
   `registry_state` TINYINT DEFAULT NULL COMMENT '0=INACTIVE, 1=ACTIVE',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
+
+CREATE TABLE `typemovement` ( 
+`id` INT NOT NULL AUTO_INCREMENT, 
+`subType` VARCHAR(30), 
+`statusMovement` VARCHAR(30), 
+`createdAt` DATETIME DEFAULT NULL, 
+`createdBy` VARCHAR(20)COLLATE utf8mb4_spanish2_ci DEFAULT NULL, 
+`updatedAt` DATETIME DEFAULT NULL, 
+`updatedBy` VARCHAR(20)COLLATE utf8mb4_spanish2_ci DEFAULT NULL, 
+`registry_state` TINYINT DEFAULT NULL COMMENT '0=INACTIVE, 1=ACTIVE', 
+PRIMARY KEY (`id`) );
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

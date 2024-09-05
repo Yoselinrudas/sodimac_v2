@@ -17,4 +17,9 @@ public interface ProductService {
     List<ProductResponseDTO> getActiveProducts();
     List<ProductResponseDTO> getListProduct(Category category);
 
+    List<ProductResponseDTO>getProductForBuys();
+    /* Object buyProduct(long id, double quantityPurchased);
+    Object sellProduct(long id, int quantitySold);
+    List<Product> getListProductForBuy();
+    Product getProductForBuyBusiness(long idProduct);*/
 }

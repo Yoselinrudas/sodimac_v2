@@ -32,12 +32,6 @@ public class SaleController {
     public ResponseEntity<ProformaResponseDTO> getProforma(@PathVariable long id){
         return ResponseEntity.ok(saleService.getProforma(id));
     }
-
-   /* @PutMapping("/{id}")
-    public ResponseEntity<ProformaResponseDTO> updateProforma(@Valid @PathVariable long id, @RequestBody ProformaRequestDTO proformaDTO){
-        return ResponseEntity.ok(saleService.updateProforma(id, proformaDTO));
-    }*/
-
     @PostMapping("/confirmTicket")
     public ResponseEntity<TicketResponseDTO> confirmSaleTicket(@RequestBody TicketRequestDTO confirmedTicket){
         TicketResponseDTO ticket = saleService.confirmSaleTicket(confirmedTicket);
@@ -46,7 +40,8 @@ public class SaleController {
 
     @GetMapping("/ticket/{id}")
     public ResponseEntity<TicketResponseDTO> getTicket(@PathVariable long id){
-        return null;
+
+        return ResponseEntity.ok(saleService.getTicket(id));
     }
 
     @PostMapping("/confirmBill")
@@ -55,8 +50,9 @@ public class SaleController {
         return ResponseEntity.ok(bill);
     }
 
-    @GetMapping("/Bill/{id}")
+    @GetMapping("/bill/{id}")
     ResponseEntity<BillResponseDTO> getBill(@PathVariable long id){
-        return null;
+
+        return ResponseEntity.ok(saleService.getBill(id));
     }
 }
