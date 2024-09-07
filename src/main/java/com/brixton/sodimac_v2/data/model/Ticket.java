@@ -20,4 +20,7 @@ public class Ticket extends Audit{
     @ManyToOne
     @JoinColumn(name = "proforma_id", foreignKey = @ForeignKey(name = "fk_ticket_proforma_id"))
     private Proforma proforma;
+
+    @Column(name = "total")
+    private double total;
 }

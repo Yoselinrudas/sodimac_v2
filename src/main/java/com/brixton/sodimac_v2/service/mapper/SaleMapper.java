@@ -26,6 +26,7 @@ public interface SaleMapper {
     @Mapping(source = "statusSale.id", target = "statusSale")
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = "yyyy/MM/dd HH:mm")
     @Mapping(source = "updatedAt", target = "updatedAt", dateFormat = "yyyy/MM/dd HH:mm")
+    @Mapping(source = "id", target = "id")
     ProformaResponseDTO proformaToProformaResponseDto(Proforma proforma);
     @Mapping(source = "product", target = "product.id")
     SaleDetail saleDetailRequestDtoToSaleDetail(SaleDetailRequestDTO saleDetailRequestDTO);

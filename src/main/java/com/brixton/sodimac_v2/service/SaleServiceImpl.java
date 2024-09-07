@@ -3,8 +3,10 @@ package com.brixton.sodimac_v2.service;
 import com.brixton.sodimac_v2.data.controller.GenericNotFoundException;
 import com.brixton.sodimac_v2.data.controller.UnauthorizedException;
 import com.brixton.sodimac_v2.data.model.enums.RegistryProformaType;
+import com.brixton.sodimac_v2.data.model.enums.RegistryStateType;
 import com.brixton.sodimac_v2.data.model.enums.StatusGroupType;
 import com.brixton.sodimac_v2.data.model.*;
+import com.brixton.sodimac_v2.data.model.enums.TypeDocumentBusiness;
 import com.brixton.sodimac_v2.data.repository.*;
 import com.brixton.sodimac_v2.dto.request.BillRequestDTO;
 import com.brixton.sodimac_v2.dto.request.ProformaRequestDTO;
@@ -21,13 +23,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.brixton.sodimac_v2.service.utils.FuntionalBusinessInterfaces.auditCreation;
-import static com.brixton.sodimac_v2.service.utils.FuntionalBusinessInterfaces.business;
+import static com.brixton.sodimac_v2.service.utils.FuntionalBusinessInterfaces.*;
 
 @Service
 @Slf4j
@@ -54,6 +55,10 @@ public class SaleServiceImpl implements SaleService{
     private TicketRepository ticketRepository;
     @Autowired
     private  BillRepository billRepository;
+    @Autowired
+    private MovementRepository movementRepository;
+    @Autowired
+    private TypeOfMovementRepository typeOfMovementRepository;
 
     public SaleServiceImpl(){
 
@@ -176,11 +181,12 @@ public class SaleServiceImpl implements SaleService{
         ticket.setNaturalClient(client);
         ticket.setProforma(confirmedProforma);
 
-        ticket = ticketRepository.save(ticket);
-
         double totalSum = confirmedProforma.getDetails().stream()
                 .mapToDouble(SaleDetail::getTotal)
                 .sum();
+
+        ticket.setTotal(totalSum);
+        ticket = ticketRepository.save(ticket);
 
         for(SaleDetail detail: confirmedProforma.getDetails()){
             Product productUpdated = detail.getProduct();
@@ -242,6 +248,10 @@ public class SaleServiceImpl implements SaleService{
         double igv = subTotal * Constantes.IGV;
         double total = subTotal + igv;
 
+        bill.setTotal(total);
+        bill.setSubtotal(subTotal);
+        bill.setIgv(igv);
+
 
         bill = billRepository.save(bill);
 
@@ -278,5 +288,40 @@ public class SaleServiceImpl implements SaleService{
         return bill;
     }
 
+    @Override
+    public TicketResponseDTO deleteTicket(long id) {
+        Ticket ticketFound = ticketRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new GenericNotFoundException("Ticket con Id no existente"));
+        ticketFound.setRegistryState(RegistryStateType.INACTIVE);
+
+        for(SaleDetail detail: ticketFound.getProforma().getDetails()){
+            Product productUpdated = detail.getProduct();
+            float newStock = productUpdated.getQuantity() + detail.getQuantity();
+
+            //moviiento por cada prodcut
+            Movement movement = new Movement();
+            movement.setProductId(productUpdated);
+            movement.setAffectedAmount(detail.getQuantity());
+            movement.setNewStock(newStock);
+            movement.setDocumentId((int) id);
+            movement.setTypeDocumentBusiness(TypeDocumentBusiness.TICKET);  // Asumiendo que es un tipo de ticket
+            movement.setDateMovement(LocalDate.now());
+            movement.setTypeOfMovement(typeOfMovementRepository.findBySubType("CANCELED"));
+            auditCreation.accept(movement);
+            movementRepository.save(movement);
+            productUpdated.setQuantity(newStock);
+            productRepository.save(productUpdated);
+        }
+        return null;
+    }
+
+
+    @Override
+    public BillResponseDTO deleteBill(long id) {
+        Bill billFound = billRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new GenericNotFoundException("Bill con Id no existente"));
+        auditUpdate.accept(billFound);
+        return null;
+    }
 
 }

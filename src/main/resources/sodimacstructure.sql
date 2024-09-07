@@ -36,24 +36,24 @@ CREATE TABLE `area` (
 DROP TABLE IF EXISTS `bill`;
 
 CREATE TABLE `bill` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `legalclient_ruc` VARCHAR(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
-  `proforma_id` BIGINT DEFAULT NULL,
-  `subtotal` FLOAT DEFAULT NULL,
-  `total` FLOAT DEFAULT NULL,
-  `igv` FLOAT DEFAULT NULL,
-  `createdat` DATETIME DEFAULT NULL,
-  `createdby` VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
-  `updatedat` DATETIME DEFAULT NULL,
-  `updatedby` VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
-  `registry_state` TINYINT DEFAULT NULL COMMENT '0=INACTIVE, 1=ACTIVE',
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `legalclient_ruc` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
+  `proforma_id` bigint DEFAULT NULL,
+  `subtotal` float DEFAULT NULL,
+  `total` float DEFAULT NULL,
+  `igv` float DEFAULT NULL,
+  `createdat` datetime DEFAULT NULL,
+  `createdby` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
+  `updatedat` datetime DEFAULT NULL,
+  `updatedby` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
+  `registry_state` tinyint DEFAULT NULL COMMENT '0=INACTIVE, 1=ACTIVE',
   PRIMARY KEY (`id`),
   KEY `FK_bill` (`registry_state`),
   KEY `FK_bill_proforma` (`proforma_id`),
   KEY `FK_legalClient` (`legalclient_ruc`),
   CONSTRAINT `FK_bill` FOREIGN KEY (`legalclient_ruc`) REFERENCES `legal_client` (`ruc`),
   CONSTRAINT `FK_bill_proforma` FOREIGN KEY (`proforma_id`) REFERENCES `proforma` (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
 
 /*Table structure for table `buy` */
 
@@ -459,6 +459,24 @@ CREATE TABLE `typemovement` (
 `updatedBy` VARCHAR(20)COLLATE utf8mb4_spanish2_ci DEFAULT NULL, 
 `registry_state` TINYINT DEFAULT NULL COMMENT '0=INACTIVE, 1=ACTIVE', 
 PRIMARY KEY (`id`) );
+
+CREATE TABLE `movement` ( 
+`id` INT NOT NULL AUTO_INCREMENT, 
+`typemovement_Id` INT, 
+`product_id` BIGINT, 
+`affectedamount` DOUBLE, 
+`newstock` DOUBLE, 
+`document_id` INT, 
+`documentname` VARCHAR(50), 
+`datemovement` DATETIME, 
+`createdat` DATETIME, 
+`createdby` VARCHAR(20), 
+`updatedat` DATETIME, 
+`updatedby` VARCHAR(20), 
+`registry_state` TINYINT COMMENT '0=INACTIVE, 1=ACTIVE', 
+PRIMARY KEY (`id`) , 
+CONSTRAINT `fk_typemovementxmovement` FOREIGN KEY (`typemovement_Id`) REFERENCES `typemovement`(`id`), 
+CONSTRAINT `fk_productxmovement` FOREIGN KEY (`product_id`) REFERENCES `product`(`id`) );
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

@@ -13,6 +13,7 @@ import java.util.List;
 @ToString
 public class ProformaResponseDTO extends AuditResponseDTO {
 
+    private long id;
     private long employee;
     private int statusSale;
     private double total;

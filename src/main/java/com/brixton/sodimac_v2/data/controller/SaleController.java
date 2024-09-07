@@ -11,6 +11,7 @@ import com.brixton.sodimac_v2.service.SaleService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,5 +55,17 @@ public class SaleController {
     ResponseEntity<BillResponseDTO> getBill(@PathVariable long id){
 
         return ResponseEntity.ok(saleService.getBill(id));
+    }
+
+    @DeleteMapping("/ticket/{id}")
+    ResponseEntity<TicketResponseDTO> deleteTicket(@PathVariable long id){
+        saleService.deleteTicket(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping("/bill/{id}")
+    ResponseEntity<BillResponseDTO> deleteBill(@PathVariable long id){
+        saleService.deleteBill(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

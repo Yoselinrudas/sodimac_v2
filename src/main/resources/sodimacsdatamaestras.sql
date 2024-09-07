@@ -61,7 +61,7 @@ INSERT  INTO `statuslogistic`(`id`,`description`,`statuslogistic`,`createdat`,`c
 
 /*Data for the table `statussale` */
 
-INSERT  INTO `statussale`(`id`,`description`,`statussale`,`createdat`,`createdby`,`updatedat`,`updatedby`,`registry_state`) VALUES 
+INSERT  INTO `statussale`(`id`,`description`,`statusgroup`,`createdat`,`createdby`,`updatedat`,`updatedby`,`registry_state`) VALUES 
 (10,'AVAILABLE','DETAIL',NOW(),'BRIXTON',NULL,NULL,1),
 (11,'OUT_OF_STOCK','DETAIL',NOW(),'BRIXTON',NULL,NULL,1),
 (20,'CONFIRMED','PROFORMA',NOW(),'BRIXTON',NULL,NULL,1),
