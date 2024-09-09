@@ -24,4 +24,10 @@ public class FuntionalBusinessInterfaces {
         input.setAddressBusiness(Constantes.ADDRESS);
         input.setRucBusiness(Constantes.RUC);
     };
+
+    public static Consumer<Audit> auditDelete = input->{
+        input.setUpdatedBy(Constantes.USER_APP);
+        input.setUpdatedAt(LocalDateTime.now());
+        input.setRegistryState(RegistryStateType.INACTIVE);
+    };
 }

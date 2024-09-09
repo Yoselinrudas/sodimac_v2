@@ -292,7 +292,12 @@ public class SaleServiceImpl implements SaleService{
     public TicketResponseDTO deleteTicket(long id) {
         Ticket ticketFound = ticketRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new GenericNotFoundException("Ticket con Id no existente"));
-        ticketFound.setRegistryState(RegistryStateType.INACTIVE);
+
+        if (ticketFound.getRegistryState() == RegistryStateType.INACTIVE) {
+            throw new IllegalStateException("El comprobante está inactivo y no puede ser cancelado.");
+        }
+        auditDelete.accept(ticketFound);
+        ticketRepository.save(ticketFound);
 
         for(SaleDetail detail: ticketFound.getProforma().getDetails()){
             Product productUpdated = detail.getProduct();
@@ -304,7 +309,7 @@ public class SaleServiceImpl implements SaleService{
             movement.setAffectedAmount(detail.getQuantity());
             movement.setNewStock(newStock);
             movement.setDocumentId((int) id);
-            movement.setTypeDocumentBusiness(TypeDocumentBusiness.TICKET);  // Asumiendo que es un tipo de ticket
+            movement.setTypeDocumentBusiness(TypeDocumentBusiness.TICKET);
             movement.setDateMovement(LocalDate.now());
             movement.setTypeOfMovement(typeOfMovementRepository.findBySubType("CANCELED"));
             auditCreation.accept(movement);
@@ -320,7 +325,32 @@ public class SaleServiceImpl implements SaleService{
     public BillResponseDTO deleteBill(long id) {
         Bill billFound = billRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new GenericNotFoundException("Bill con Id no existente"));
-        auditUpdate.accept(billFound);
+        if (billFound.getRegistryState() == RegistryStateType.INACTIVE) {
+            throw new IllegalStateException("El comprobante está inactivo y no puede ser cancelado.");
+        }
+
+        auditDelete.accept(billFound);
+
+        billRepository.save(billFound);
+
+        for(SaleDetail detail: billFound.getProforma().getDetails()){
+            Product productUpdated = detail.getProduct();
+            float newStock = productUpdated.getQuantity() + detail.getQuantity();
+
+            //moviiento por cada prodcut
+            Movement movement = new Movement();
+            movement.setProductId(productUpdated);
+            movement.setAffectedAmount(detail.getQuantity());
+            movement.setNewStock(newStock);
+            movement.setDocumentId((int) id);
+            movement.setTypeDocumentBusiness(TypeDocumentBusiness.BILL);
+            movement.setDateMovement(LocalDate.now());
+            movement.setTypeOfMovement(typeOfMovementRepository.findBySubType("CANCELED"));
+            auditCreation.accept(movement);
+            movementRepository.save(movement);
+            productUpdated.setQuantity(newStock);
+            productRepository.save(productUpdated);
+        }
         return null;
     }
 
