@@ -9,23 +9,26 @@ import java.util.function.Consumer;
 
 public class FuntionalBusinessInterfaces {
 
-    public static Consumer<Audit> auditCreation = input->{
+    private FuntionalBusinessInterfaces() {
+    }
+
+    public static final Consumer<Audit> auditCreation = input->{
         input.setCreatedAt(LocalDateTime.now());
         input.setCreatedBy(Constantes.USER_APP);
         input.setRegistryState(RegistryStateType.ACTIVE);
     };
-    public static Consumer<Audit> auditUpdate = input ->{
+    public static final Consumer<Audit> auditUpdate = input ->{
         input.setUpdatedBy(Constantes.USER_APP);
         input.setUpdatedAt(LocalDateTime.now());
     };
 
-    public static Consumer<DataBusinessDTO> business = input->{
+    public static final Consumer<DataBusinessDTO> business = input->{
         input.setRazonSocialBusiness(Constantes.RAZON_SOCIAL);
         input.setAddressBusiness(Constantes.ADDRESS);
         input.setRucBusiness(Constantes.RUC);
     };
 
-    public static Consumer<Audit> auditDelete = input->{
+    public static final Consumer<Audit> auditDelete = input->{
         input.setUpdatedBy(Constantes.USER_APP);
         input.setUpdatedAt(LocalDateTime.now());
         input.setRegistryState(RegistryStateType.INACTIVE);

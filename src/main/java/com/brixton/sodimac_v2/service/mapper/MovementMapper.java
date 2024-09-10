@@ -3,7 +3,6 @@ package com.brixton.sodimac_v2.service.mapper;
 import com.brixton.sodimac_v2.data.model.Movement;
 import com.brixton.sodimac_v2.dto.request.MovementProductRequestDTO;
 import com.brixton.sodimac_v2.dto.response.MovementProductResponseDTO;
-import org.hibernate.event.spi.SaveOrUpdateEvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

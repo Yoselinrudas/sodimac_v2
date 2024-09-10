@@ -1,6 +1,5 @@
 package com.brixton.sodimac_v2.dto.request;
 
-import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

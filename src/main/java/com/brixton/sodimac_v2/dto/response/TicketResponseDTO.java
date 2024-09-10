@@ -1,6 +1,5 @@
 package com.brixton.sodimac_v2.dto.response;
 
-import com.brixton.sodimac_v2.dto.response.generic.AuditResponseDTO;
 import com.brixton.sodimac_v2.dto.response.generic.DataBusinessDTO;
 import lombok.Getter;
 import lombok.Setter;

@@ -10,7 +10,6 @@ import com.brixton.sodimac_v2.dto.response.TicketResponseDTO;
 public interface SaleService {
     ProformaResponseDTO createProforma(ProformaRequestDTO inputProforma);
     ProformaResponseDTO getProforma(long id);
-    //ProformaResponseDTO updateProforma(long id, ProformaRequestDTO proformaDTO);
     TicketResponseDTO confirmSaleTicket(TicketRequestDTO confirmedTicket);
     TicketResponseDTO getTicket(long id);
     BillResponseDTO confirmSaleBill(BillRequestDTO confirmedBill);

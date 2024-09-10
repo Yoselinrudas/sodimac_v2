@@ -2,7 +2,6 @@ package com.brixton.sodimac_v2.data.model;
 
 
 import com.brixton.sodimac_v2.data.model.enums.RegistryProformaType;
-import com.brixton.sodimac_v2.data.model.enums.RegistryStateType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

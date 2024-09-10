@@ -17,6 +17,7 @@ import com.brixton.sodimac_v2.dto.response.SaleDetailResponseDTO;
 import com.brixton.sodimac_v2.dto.response.TicketResponseDTO;
 import com.brixton.sodimac_v2.service.mapper.ClientMapper;
 import com.brixton.sodimac_v2.service.mapper.SaleMapper;
+import com.brixton.sodimac_v2.service.utils.ConstanteError;
 import com.brixton.sodimac_v2.service.utils.Constantes;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -60,10 +61,6 @@ public class SaleServiceImpl implements SaleService{
     @Autowired
     private TypeOfMovementRepository typeOfMovementRepository;
 
-    public SaleServiceImpl(){
-
-    }
-
     @Override
     public ProformaResponseDTO createProforma(ProformaRequestDTO inputProforma) {
 
@@ -90,7 +87,7 @@ public class SaleServiceImpl implements SaleService{
         for(SaleDetail detail: proforma.getDetails()){
 
             Product product = productRepository.findById(detail.getProduct().getId())
-                    .orElseThrow(() -> new GenericNotFoundException(("Product con Id no existente")));;
+                    .orElseThrow(() -> new GenericNotFoundException(("Product con Id no existente")));
 
             //calcular la cantidad  disponible
             double availableQuantity = product.getQuantity() - getConfirmedQuantityForProduct(product.getId()) - detail.getQuantity();
@@ -154,7 +151,7 @@ public class SaleServiceImpl implements SaleService{
     @Override
     public ProformaResponseDTO getProforma(long id) {
         Proforma proformaFound = proformaRepository.findByIdWithDetails(id)
-                .orElseThrow(() -> new GenericNotFoundException("Proforma con Id no existente"));
+                .orElseThrow(() -> new GenericNotFoundException(ConstanteError.PROFORMA_NOT_FOUND));
         return SaleMapper.INSTANCE.proformaToProformaResponseDto(proformaFound);
     }
 
@@ -162,7 +159,7 @@ public class SaleServiceImpl implements SaleService{
     public TicketResponseDTO confirmSaleTicket(TicketRequestDTO confirmedTicket) {
 
         Proforma confirmedProforma = proformaRepository.findByIdWithDetails(confirmedTicket.getProformaId())
-                .orElseThrow(() -> new GenericNotFoundException("Proforma con Id no existente"));
+                .orElseThrow(() -> new GenericNotFoundException(ConstanteError.PROFORMA_NOT_FOUND));
 
         // Verificar si la proforma ya ha sido usada
         if (confirmedProforma.getRegistryProforma() == RegistryProformaType.USED) {
@@ -222,7 +219,7 @@ public class SaleServiceImpl implements SaleService{
     @Override
     public BillResponseDTO confirmSaleBill(BillRequestDTO confirmedBill) {
 
-        Proforma confirmedProforma = proformaRepository.findByIdWithDetails(confirmedBill.getProformaId()).orElseThrow(() -> new GenericNotFoundException("Proforma con Id no existente"));
+        Proforma confirmedProforma = proformaRepository.findByIdWithDetails(confirmedBill.getProformaId()).orElseThrow(() -> new GenericNotFoundException(ConstanteError.PROFORMA_NOT_FOUND));
         // Verificar si la proforma ya ha sido usada
         if (confirmedProforma.getRegistryProforma() == RegistryProformaType.USED) {
             throw new IllegalStateException("La proforma ya ha sido utilizada y no se puede volver a procesar.");
@@ -294,7 +291,7 @@ public class SaleServiceImpl implements SaleService{
                 .orElseThrow(() -> new GenericNotFoundException("Ticket con Id no existente"));
 
         if (ticketFound.getRegistryState() == RegistryStateType.INACTIVE) {
-            throw new IllegalStateException("El comprobante está inactivo y no puede ser cancelado.");
+            throw new IllegalStateException("El comprobante está inactivo.");
         }
         auditDelete.accept(ticketFound);
         ticketRepository.save(ticketFound);

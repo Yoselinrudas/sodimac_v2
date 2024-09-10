@@ -10,6 +10,7 @@ import com.brixton.sodimac_v2.dto.request.EmployeeRequestDTO;
 import com.brixton.sodimac_v2.dto.request.UpdateEmployeeRequestDTO;
 import com.brixton.sodimac_v2.dto.response.EmployeeResponseDTO;
 import com.brixton.sodimac_v2.service.mapper.EmployeeMapper;
+import com.brixton.sodimac_v2.service.utils.ConstanteError;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +33,6 @@ public class EmployeeServiceImpl implements EmployeeService{
     @Autowired
     private AreaRepository areaRepository;
 
-    public EmployeeServiceImpl(){
-
-    }
     @Override
     public EmployeeResponseDTO createEmployee(EmployeeRequestDTO createEmployee) {
         Employee employee = EmployeeMapper.INSTANCE.employeeRequestDtoToEmployee(createEmployee);
@@ -65,7 +63,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     @Override
     public EmployeeResponseDTO getEmployee(long id) {
-        Employee employeeFound = employeeRepository.findById(id).orElseThrow(() -> new GenericNotFoundException(("Empleado con Id no existente")));
+        Employee employeeFound = employeeRepository.findById(id).orElseThrow(() -> new GenericNotFoundException((ConstanteError.EMPLOYEE_NOT_FOUND)));
         return EmployeeMapper.INSTANCE.employeeToEmployeeResponseDto(employeeFound);
     }
 
@@ -81,7 +79,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     @Override
     public EmployeeResponseDTO updateEmployee(long id, UpdateEmployeeRequestDTO employeeForUpdate) {
-        Employee original = employeeRepository.findById(id).orElseThrow(() -> new GenericNotFoundException(("Empleado con Id no existente")));
+        Employee original = employeeRepository.findById(id).orElseThrow(() -> new GenericNotFoundException((ConstanteError.EMPLOYEE_NOT_FOUND)));
         Employee employeeTemp = EmployeeMapper.INSTANCE.updateEmployeeRequestDtoToEmployee(employeeForUpdate);
 
         original.setEmployeeName(employeeTemp.getEmployeeName());
@@ -103,7 +101,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     @Override
     public void deleteEmployee(long id) {
-        Employee employeeFound = employeeRepository.findById(id).orElseThrow(() -> new GenericNotFoundException("Empleado con Id no existente"));
+        Employee employeeFound = employeeRepository.findById(id).orElseThrow(() -> new GenericNotFoundException(ConstanteError.EMPLOYEE_NOT_FOUND));
         employeeFound.setRegistryState(RegistryStateType.INACTIVE);
         employeeFound.setUpdatedAt(LocalDateTime.now());
         employeeFound.setUpdatedBy(USER_APP);

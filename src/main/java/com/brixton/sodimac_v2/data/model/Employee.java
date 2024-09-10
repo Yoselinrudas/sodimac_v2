@@ -26,9 +26,6 @@ public class Employee extends Person{
     @JoinColumn(name = "area_id", foreignKey = @ForeignKey(name = "fk_employee_area_id"))
     private Area area;
 
-    //@OneToMany(mappedBy = "employee")
-    //private Set<EmployeexPerfil> employeexPerfil = new HashSet<>();
-
     @Transient
     private int profileId;
 }

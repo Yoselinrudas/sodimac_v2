@@ -32,18 +32,12 @@ public class ProductServiceImpl implements ProductService{
 
     @Autowired
     private CategoryRepository categoryRepository;
-    public ProductServiceImpl(){
-
-    }
-
 
     @Override
     public ProductResponseDTO createProduct(ProductRequestDTO inputProduct) {
-        Product product = ProductMapper.INSTANCE.ProductRequestDtoToProduct(inputProduct);
+        Product product = ProductMapper.INSTANCE.productRequestDtoToProduct(inputProduct);
         product.setCreatedAt(LocalDateTime.now());
         product.setCreatedBy(USER_APP);
-        //product.setUpdatedAt(LocalDateTime.now());
-        //product.setUpdatedBy(USER_APP);
         product.setRegistryState(RegistryStateType.ACTIVE);
         Category category = categoryRepository.findById(product.getCategory().getId()).orElseThrow(() -> new GenericNotFoundException("Categoria con Id no existente"));
         product.getCategory().setCategoryName(category.getCategoryName());
@@ -126,22 +120,4 @@ public class ProductServiceImpl implements ProductService{
         return productFounds;
     }
 
-    @Override
-    public List<ProductResponseDTO> getProductForBuys() {
-
-        // Obtener todos los productos de la base de datos
-        List<Product> allProducts = productRepository.findAll();
-
-        // Filtrar productos con stock bajo
-        for (Product product : allProducts) {
-            if (product.getQuantity() <= product.getMinQuantity()) {
-
-                //ProductResponseDTO product = ProductMapper.INSTANCE.productToProductResponseDto(product);
-
-            }
-        }
-
-        // Devolver la lista de productos que necesitan ser comprados
-        return null;
-    }
 }

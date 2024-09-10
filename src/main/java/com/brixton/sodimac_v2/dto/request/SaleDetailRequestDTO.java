@@ -14,9 +14,5 @@ public class SaleDetailRequestDTO {
     private long product;
     @NotNull(message = "Quantity no puede ser vacio")
     private float quantity;
-    //@NotNull(message = "PriceSale no puede ser vacio")
-   // private double priceSale;
-
-
 
 }

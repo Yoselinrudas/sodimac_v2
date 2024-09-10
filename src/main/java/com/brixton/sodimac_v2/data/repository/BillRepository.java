@@ -1,7 +1,6 @@
 package com.brixton.sodimac_v2.data.repository;
 
 import com.brixton.sodimac_v2.data.model.Bill;
-import com.brixton.sodimac_v2.data.model.Proforma;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

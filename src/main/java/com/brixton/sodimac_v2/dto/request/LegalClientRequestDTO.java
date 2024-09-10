@@ -1,6 +1,5 @@
 package com.brixton.sodimac_v2.dto.request;
 
-import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;

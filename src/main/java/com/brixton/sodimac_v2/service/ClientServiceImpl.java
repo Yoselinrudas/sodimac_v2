@@ -11,12 +11,12 @@ import com.brixton.sodimac_v2.dto.request.NaturalClientRequestDTO;
 import com.brixton.sodimac_v2.dto.response.LegalClientResponseDTO;
 import com.brixton.sodimac_v2.dto.response.NaturalClientResponseDTO;
 import com.brixton.sodimac_v2.service.mapper.ClientMapper;
+import com.brixton.sodimac_v2.service.utils.ConstanteError;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,11 +33,6 @@ public class ClientServiceImpl implements ClientService{
     private NaturalClientRepository naturalClientRepository;
     @Autowired
     private LegalClientRepository legalClientRepository;
-
-
-    public ClientServiceImpl(){
-
-    }
     
     @Override
     public NaturalClientResponseDTO createNaturalClient(NaturalClientRequestDTO inputClient) {
@@ -54,7 +49,6 @@ public class ClientServiceImpl implements ClientService{
     @Override
     public LegalClientResponseDTO createLegalClient(LegalClientRequestDTO inputClient) {
         LegalClient client = ClientMapper.INSTANCE.legalClientRequestDtoToLegalClient(inputClient);
-        //client.setRuc(inputClient.getRuc());
         auditCreation.accept(client);
         legalClientRepository.save(client);
         LegalClientResponseDTO legalClientResponseDTO = ClientMapper.INSTANCE.legalClientToLegalClientResponseDto(client);
@@ -90,7 +84,7 @@ public class ClientServiceImpl implements ClientService{
 
     @Override
     public NaturalClientResponseDTO updateNaturalClient(String numberDoc, NaturalClientRequestDTO client) {
-        NaturalClient original = naturalClientRepository.findById(numberDoc).orElseThrow(() -> new GenericNotFoundException("Cliente con documento no identificado"));
+        NaturalClient original = naturalClientRepository.findById(numberDoc).orElseThrow(() -> new GenericNotFoundException(ConstanteError.CLIENT_NOT_FOUND));
         NaturalClient clientTemp = ClientMapper.INSTANCE.naturalClientRequestDtoToNaturalClient(client);
 
         original.setTypeDocument(clientTemp.getTypeDocument());
@@ -121,7 +115,7 @@ public class ClientServiceImpl implements ClientService{
 
     @Override
     public NaturalClientResponseDTO getNaturalClient(String numberDoc) {
-        NaturalClient clientFound = naturalClientRepository.findById(numberDoc).orElseThrow(()-> new GenericNotFoundException("Cliente con documento no identificado"));
+        NaturalClient clientFound = naturalClientRepository.findById(numberDoc).orElseThrow(()-> new GenericNotFoundException(ConstanteError.CLIENT_NOT_FOUND));
         return ClientMapper.INSTANCE.naturalClientToNaturalClientResponseDto(clientFound);
     }
 
@@ -153,7 +147,7 @@ public class ClientServiceImpl implements ClientService{
 
     @Override
     public void deleteNaturalClient(String numberDoc) {
-        NaturalClient clientFound = naturalClientRepository.findById(numberDoc).orElseThrow(()-> new GenericNotFoundException("Cliente con documento no identificado"));
+        NaturalClient clientFound = naturalClientRepository.findById(numberDoc).orElseThrow(()-> new GenericNotFoundException(ConstanteError.CLIENT_NOT_FOUND));
         clientFound.setRegistryState(RegistryStateType.INACTIVE);
         auditUpdate.accept(clientFound);
         naturalClientRepository.save(clientFound);
