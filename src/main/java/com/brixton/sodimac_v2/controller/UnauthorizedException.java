@@ -1,4 +1,4 @@
-package com.brixton.sodimac_v2.data.controller;
+package com.brixton.sodimac_v2.controller;
 
 public class UnauthorizedException extends RuntimeException{
 
