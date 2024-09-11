@@ -1,4 +1,4 @@
-package com.brixton.sodimac_v2.data.controller;
+package com.brixton.sodimac_v2.controller;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.extern.slf4j.Slf4j;

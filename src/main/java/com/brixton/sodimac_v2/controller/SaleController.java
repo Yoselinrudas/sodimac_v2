@@ -1,4 +1,4 @@
-package com.brixton.sodimac_v2.data.controller;
+package com.brixton.sodimac_v2.controller;
 
 import com.brixton.sodimac_v2.dto.request.BillRequestDTO;
 import com.brixton.sodimac_v2.dto.request.ProformaRequestDTO;
