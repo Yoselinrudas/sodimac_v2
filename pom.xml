@@ -155,9 +155,9 @@
 			</activation>
 			<properties>
 				<!-- Optional URL to server. Default value is http://localhost:9000 -->
-				<sonar.host.url>http://localhost:9000</sonar.host.url>
-				<sonar.login>sqp_4108a190ec90b836eaaeacbdf1729b9b8afd5785</sonar.login>
-				<sonar.projectKey>sodimac-v5</sonar.projectKey>
+<!--				<sonar.host.url>http://localhost:9000</sonar.host.url>-->
+<!--				<sonar.login>sqp_4108a190ec90b836eaaeacbdf1729b9b8afd5785</sonar.login>-->
+<!--				<sonar.projectKey>sodimac-v5</sonar.projectKey>-->
 			</properties>
 		</profile>
 	</profiles>
