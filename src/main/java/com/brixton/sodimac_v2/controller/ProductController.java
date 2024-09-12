@@ -27,6 +27,27 @@ public class ProductController {
         ProductResponseDTO product = productService.createProduct(inputProduct);
         return ResponseEntity.ok(product);
     }
+
+    public Integer sumar(int x, int y){
+        //Casos de prueba:
+        // 2. x = 50 (5), y = 100(10) -> (x+y) (5+10)=15
+        // 1. x = 2 (4), y = 2(8) -> (x+y) (4+8)=12
+        // 3. x = 2 (4), y = 50(8) -> (x+y) (4+8)=12
+        // 4. x = 50, y = 100(10) -> (x+y) (5+10)=15
+
+        if(x >= 50 ) {
+            x = 5;
+        } else {
+            x = 4;
+        }
+        if(y >= 100 ) {
+            y = 10;
+        } else {
+            y = 7;
+        }
+        return x + y;
+    }
+
     @PostMapping("/createWithList")
     public ResponseEntity<List<ProductResponseDTO>> createWithList(@RequestBody List<ProductRequestDTO> inputProducts){
 
