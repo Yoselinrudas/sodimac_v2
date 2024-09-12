@@ -76,7 +76,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
-		<!-- Librerias para pruebas-->
+		<!-- Librerias para pruebas -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -100,6 +100,7 @@
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
+					<version>3.7.0.1746</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -158,6 +159,8 @@
 				<sonar.host.url>http://localhost:9000</sonar.host.url>
 				<sonar.login>sqp_4108a190ec90b836eaaeacbdf1729b9b8afd5785</sonar.login>
 				<sonar.projectKey>sodimac-v5</sonar.projectKey>
+<!--				<sonar.login>sqp_7335c47744050044c8449e45fee761c11fb10956</sonar.login>-->
+<!--				<sonar.projectKey>sodimac-v2</sonar.projectKey>-->
 			</properties>
 		</profile>
 	</profiles>
