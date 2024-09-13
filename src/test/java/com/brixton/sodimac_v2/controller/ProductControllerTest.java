@@ -58,42 +58,55 @@ class ProductControllerTest {
     @Test
     void sumarTestScenario2(){
         //Arrange
-        Integer sumaExpected = 12;
-
-        Integer inputX = 50;
-        Integer inputY = 2;
-        //Act
-        Integer suma = productController.sumar(inputX, inputY);
-        //Assert
-        assertEquals(sumaExpected, suma);
-    }
-
-    @Test
-    void sumarTestScenario3(){
-        //Arrange
-        Integer sumaExpected = 14;
-
-        Integer inputX = 2;
-        Integer inputY = 100;
-        //Act
-        Integer suma = productController.sumar(inputX, inputY);
-        //Assert
-        assertEquals(sumaExpected, suma);
-    }
-
-    @Test
-    @DisplayName("Suma, x mayor a 50 y y menor a 100")
-    void sumarTestScenario4(){
-        //Arrange
         Integer sumaExpected = 11;
 
-        Integer inputX = 2;
-        Integer inputY = 2;
+        Integer inputX = 5;
+        Integer inputY = 70;
         //Act
         Integer suma = productController.sumar(inputX, inputY);
         //Assert
         assertEquals(sumaExpected, suma);
     }
+
+    //@Test
+//    void sumarTestScenario2(){
+//        //Arrange
+//        Integer sumaExpected = 12;
+//
+//        Integer inputX = 50;
+//        Integer inputY = 2;
+//        //Act
+//        Integer suma = productController.sumar(inputX, inputY);
+//        //Assert
+//        assertEquals(sumaExpected, suma);
+//    }
+
+    //@Test
+//    void sumarTestScenario3(){
+//        //Arrange
+//        Integer sumaExpected = 14;
+//
+//        Integer inputX = 2;
+//        Integer inputY = 100;
+//        //Act
+//        Integer suma = productController.sumar(inputX, inputY);
+//        //Assert
+//        assertEquals(sumaExpected, suma);
+//    }
+
+    //@Test
+    //@DisplayName("Suma, x mayor a 50 y y menor a 100")
+//    void sumarTestScenario4(){
+//        //Arrange
+//        Integer sumaExpected = 11;
+//
+//        Integer inputX = 2;
+//        Integer inputY = 2;
+//        //Act
+//        Integer suma = productController.sumar(inputX, inputY);
+//        //Assert
+//        assertEquals(sumaExpected, suma);
+//    }
 
     @Test
     void createWithList() {

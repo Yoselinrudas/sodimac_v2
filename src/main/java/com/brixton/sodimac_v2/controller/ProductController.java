@@ -24,28 +24,39 @@ public class ProductController {
 
     @PostMapping("/")
     public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductRequestDTO inputProduct){
+        log.info("llamando a createProduct de ProductController");
         ProductResponseDTO product = productService.createProduct(inputProduct);
+        log.info("paso previo al return en productController");
         return ResponseEntity.ok(product);
     }
 
-    public Integer sumar(int x, int y){
+    public Integer sumar(Integer x, Integer y) throws NullPointerException {
         //Casos de prueba:
         // 2. x = 50 (5), y = 100(10) -> (x+y) (5+10)=15
         // 1. x = 2 (4), y = 2(8) -> (x+y) (4+8)=12
         // 3. x = 2 (4), y = 50(8) -> (x+y) (4+8)=12
         // 4. x = 50, y = 100(10) -> (x+y) (5+10)=15
-
-        if(x >= 50 ) {
-            x = 5;
-        } else {
-            x = 4;
+        try {
+            if (x == null || y == null) {
+                throw new NullPointerException("Input values cannot be null");
+            }
+            int m = Integer.parseInt(x.toString());
+            int n = Integer.parseInt(y.toString());
+            if(m >= 50 ) {
+                m = 5;
+            } else {
+                m = 4;
+            }
+            if(n >= 100 ) {
+                n = 10;
+            } else {
+                n = 7;
+            }
+            return m + n;
+        } catch (NullPointerException | NumberFormatException e) {
+            log.error("Error en la suma", e);
+            return 0;
         }
-        if(y >= 100 ) {
-            y = 10;
-        } else {
-            y = 7;
-        }
-        return x + y;
     }
 
     @PostMapping("/createWithList")

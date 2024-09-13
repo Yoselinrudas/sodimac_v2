@@ -35,6 +35,7 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public ProductResponseDTO createProduct(ProductRequestDTO inputProduct) {
+        log.info("llamando a CreateProduct");
         Product product = ProductMapper.INSTANCE.productRequestDtoToProduct(inputProduct);
         product.setCreatedAt(LocalDateTime.now());
         product.setCreatedBy(USER_APP);
