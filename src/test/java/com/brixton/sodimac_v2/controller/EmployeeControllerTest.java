@@ -11,8 +11,12 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 class EmployeeControllerTest {
@@ -29,7 +33,7 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void createEmployee() {
+    public void createEmployee() {
         //AAA
         //Arrange  (Inicializa)
         EmployeeRequestDTO request = new EmployeeRequestDTO();
@@ -46,12 +50,27 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void createWithList() {
+    public void createWithList() {
+        List<EmployeeRequestDTO> requests = new ArrayList<>();
+        List<EmployeeResponseDTO> responses = new ArrayList<>();
+        when(employeeService.createWithList(any(List.class))).thenReturn(responses);
+
+        ResponseEntity<List<EmployeeResponseDTO>> results = employeeController.createWithList(requests);
+
+        assertEquals(HttpStatus.OK, results.getStatusCode());
+        assertEquals(responses, results.getBody());
 
     }
 
     @Test
     void getEmployee() {
+        EmployeeResponseDTO found = new EmployeeResponseDTO();
+        when(employeeService.getEmployee(anyLong())).thenReturn(found);
+
+        //ResponseEntity<EmployeeResponseDTO> result =  employeeController.getEmployee();
+
+        //assertEquals(HttpStatus.OK, result.getStatusCode());
+        //assertEquals(found, result.getBody() );
     }
 
     @Test
