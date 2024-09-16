@@ -1,5 +1,6 @@
 package com.brixton.sodimac_v2.controller;
 
+import com.brixton.sodimac_v2.data.model.Employee;
 import com.brixton.sodimac_v2.dto.request.EmployeeRequestDTO;
 import com.brixton.sodimac_v2.dto.response.EmployeeResponseDTO;
 import com.brixton.sodimac_v2.service.EmployeeService;
@@ -64,13 +65,18 @@ class EmployeeControllerTest {
 
     @Test
     void getEmployee() {
-        EmployeeResponseDTO found = new EmployeeResponseDTO();
-        when(employeeService.getEmployee(anyLong())).thenReturn(found);
 
-        //ResponseEntity<EmployeeResponseDTO> result =  employeeController.getEmployee();
+        EmployeeResponseDTO esperado = new EmployeeResponseDTO();
+        esperado.setEmployeeName("Luchito");
 
-        //assertEquals(HttpStatus.OK, result.getStatusCode());
-        //assertEquals(found, result.getBody() );
+        EmployeeResponseDTO employee = new EmployeeResponseDTO();
+        employee.setEmployeeName("Luchito");
+        when(employeeService.getEmployee(anyLong())).thenReturn(employee);
+
+        ResponseEntity<EmployeeResponseDTO> result =  employeeController.getEmployee(1L);
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(esperado.getEmployeeName(), result.getBody().getEmployeeName());
     }
 
     @Test
