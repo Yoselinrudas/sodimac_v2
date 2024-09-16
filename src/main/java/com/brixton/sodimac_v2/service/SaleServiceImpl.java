@@ -87,8 +87,13 @@ public class SaleServiceImpl implements SaleService{
         for(SaleDetail detail: proforma.getDetails()){
 
             Product product = productRepository.findById(detail.getProduct().getId())
+                    /*.orElseGet(() -> {
+                        Product newProduct = new Product();
+                        newProduct.setId(detail.getProduct().getId());
+                        return newProduct;
+                    });*/
                     .orElseThrow(() -> new GenericNotFoundException(("Product con Id no existente")));
-
+log.info("product: {}", product);
             //calcular la cantidad  disponible
             double availableQuantity = product.getQuantity() - getConfirmedQuantityForProduct(product.getId()) - detail.getQuantity();
 
@@ -98,6 +103,7 @@ public class SaleServiceImpl implements SaleService{
             detailToResponses.add(detail);
 
             log.info("cantidad disponible: {}", availableQuantity);
+            log.info("detalles: {}", statusDetails);
             if(availableQuantity >= 0){
                 StatusSale availableStatus = statusDetails.stream()
                         .filter(status -> status.getStatusGroup() == StatusGroupType.DETAIL && status.getDescription().equals("AVAILABLE"))
@@ -117,6 +123,7 @@ public class SaleServiceImpl implements SaleService{
             }
         }
         proforma.setTotal(totalSum);
+        log.info("proforma status:{}", proforma.getStatusSale());
        // Filtrar por estado de la proforma
         if ("CONFIRMED".equalsIgnoreCase(proforma.getStatusSale().getDescription())) {
             // Guardar en la base de datos si la proforma está confirmada
