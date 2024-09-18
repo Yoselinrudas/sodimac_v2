@@ -84,16 +84,18 @@ public class SaleServiceImpl implements SaleService{
         log.info("employee: {}", employee);
         log.info("proforma: {}", proforma);
         float totalSum = 0;
+
+        List<Product> nullProducts = new ArrayList<>();
         for(SaleDetail detail: proforma.getDetails()){
 
             Product product = productRepository.findById(detail.getProduct().getId())
-                    /*.orElseGet(() -> {
+                    .orElseGet(() -> {
                         Product newProduct = new Product();
                         newProduct.setId(detail.getProduct().getId());
+                        nullProducts.add(newProduct);
                         return newProduct;
-                    });*/
-                    .orElseThrow(() -> new GenericNotFoundException(("Product con Id no existente")));
-log.info("product: {}", product);
+                    });
+
             //calcular la cantidad  disponible
             double availableQuantity = product.getQuantity() - getConfirmedQuantityForProduct(product.getId()) - detail.getQuantity();
 

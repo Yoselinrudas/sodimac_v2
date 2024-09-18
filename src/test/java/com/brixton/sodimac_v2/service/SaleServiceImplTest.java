@@ -2,12 +2,17 @@ package com.brixton.sodimac_v2.service;
 
 import com.brixton.sodimac_v2.controller.GenericNotFoundException;
 import com.brixton.sodimac_v2.data.model.*;
+import com.brixton.sodimac_v2.data.model.enums.RegistryProformaType;
 import com.brixton.sodimac_v2.data.model.enums.StatusGroupType;
 import com.brixton.sodimac_v2.data.repository.*;
+import com.brixton.sodimac_v2.dto.request.NaturalClientRequestDTO;
 import com.brixton.sodimac_v2.dto.request.ProformaRequestDTO;
 import com.brixton.sodimac_v2.dto.request.SaleDetailRequestDTO;
+import com.brixton.sodimac_v2.dto.request.TicketRequestDTO;
 import com.brixton.sodimac_v2.dto.response.ProformaResponseDTO;
 import com.brixton.sodimac_v2.dto.response.SaleDetailResponseDTO;
+import com.brixton.sodimac_v2.dto.response.TicketResponseDTO;
+import com.brixton.sodimac_v2.service.mapper.SaleMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,8 +26,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class SaleServiceImplTest {
 
@@ -36,6 +40,12 @@ class SaleServiceImplTest {
     ProductRepository productRepository;
     @Mock
     SaleDetailRepository saleDetailRepository;
+    @Mock
+    NaturalClientRepository naturalClientRepository;
+    @Mock
+    LegalClientRepository legalClientRepository;
+    @Mock
+    TicketRepository ticketRepository;
 
     @InjectMocks
     SaleServiceImpl saleService;
@@ -171,8 +181,9 @@ class SaleServiceImplTest {
         ProformaResponseDTO responseDTO = saleService.createProforma(requestDTO);
 
         // Assert
-        assertNotNull(responseDTO);
+
         assertEquals(expectedResponseDTO.getDetails().get(0).getStatusDetail(), responseDTO.getDetails().get(0).getStatusDetail());
+        assertNotNull(responseDTO);
         // Add more assertions as needed
     }
 
@@ -323,17 +334,13 @@ class SaleServiceImplTest {
 
         when(employeeRepository.findById(anyLong())).thenThrow(new GenericNotFoundException("Employee not found"));
 
-        // Act
-
-        //ProformaResponseDTO responseDTO = saleService.createProforma(requestDTO);
-
-        // Assert
+        // Act y Assert
         assertThrows(GenericNotFoundException.class, () -> saleService.createProforma(requestDTO));
 
     }
 
     @Test
-    void createProforma_withNonExistingProduct_shouldThrowGenericNotFoundException() {
+    void createProforma_withNonExistingProduct_shouldHandleNonExistingProduct() {
         // Arrange
         ProformaRequestDTO requestDTO = new ProformaRequestDTO();
         requestDTO.setStatusSale(2);
@@ -383,18 +390,103 @@ class SaleServiceImplTest {
         when(statusSaleRepository.findByStatusGroup(eq(StatusGroupType.DETAIL))).thenReturn(statusDetails);
         when(statusSaleRepository.findByIdAndStatusGroup(anyInt(), eq(StatusGroupType.PROFORMA))).thenReturn(Optional.of(statusSaleConfirmado));
         when(statusSaleRepository.findByStatusGroup(eq(StatusGroupType.PROFORMA))).thenReturn(statusProformas);
-        when(productRepository.findById(anyLong())).thenThrow(new GenericNotFoundException("Product not found"));
+        when(productRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Act y Assert
-        assertThrows(GenericNotFoundException.class, () -> saleService.createProforma(requestDTO));
+        // Act
+        ProformaResponseDTO response = saleService.createProforma(requestDTO);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(1, response.getDetails().size());
+
+        // Verifica que el producto "nulo" se manejó correctamente (sin lanzar excepción)
+        verify(productRepository).findById(1L);  // Se llamó para encontrar el producto con ID
     }
 
     @Test
-    void getProforma() {
+    void getProforma_withExistingProforma_shouldReturnProformaResponseDTO() {
+        // Arrange
+        long proformaId = 1L;
+        Proforma proforma = new Proforma();
+        proforma.setId(proformaId);
+
+        ProformaResponseDTO expectedResponseDTO = new ProformaResponseDTO();
+        expectedResponseDTO.setId(proformaId);
+        // Configura el mapper para que devuelva el DTO esperado
+        when(proformaRepository.findByIdWithDetails(proformaId)).thenReturn(Optional.of(proforma));
+
+        // Act
+        ProformaResponseDTO responseDTO = saleService.getProforma(proformaId);
+
+        // Assert
+        assertNotNull(responseDTO);
+        assertEquals(proformaId, responseDTO.getId());
     }
 
     @Test
-    void confirmSaleTicket() {
+    void getProforma_withNonExistingProforma_shouldThrowGenericNotFoundException() {
+        // Arrange
+        long proformaId = 1L;
+
+        // Configura el repositorio para que devuelva un Optional vacío
+        when(proformaRepository.findByIdWithDetails(proformaId)).thenThrow(new GenericNotFoundException("Proforma not found"));
+
+        // Act & Assert
+        assertThrows(GenericNotFoundException.class, () -> saleService.getProforma(proformaId));
+    }
+
+    @Test
+    @DisplayName("confirmSaleTicket with valid input should return TicketResponseDTO")
+    void confirmSaleTicket_withValidInput_shouldReturnTicketResponseDTO() {
+        // Arrange
+        TicketRequestDTO requestDTO = new TicketRequestDTO();
+        requestDTO.setProformaId(1L);
+        NaturalClientRequestDTO clientDTO = new NaturalClientRequestDTO();
+        clientDTO.setNumber("123456");
+        requestDTO.setClient(clientDTO);
+
+        Proforma proforma = new Proforma();
+        proforma.setRegistryProforma(RegistryProformaType.UNUSED);
+        proforma.setDetails(new ArrayList<>());
+
+        when(proformaRepository.findByIdWithDetails(anyLong())).thenReturn(Optional.of(proforma));
+        when(naturalClientRepository.findById(anyString())).thenReturn(Optional.of(new NaturalClient()));
+        when(ticketRepository.save(any(Ticket.class))).thenReturn(new Ticket());
+
+        // Act
+        TicketResponseDTO responseDTO = saleService.confirmSaleTicket(requestDTO);
+
+        // Assert
+        assertNotNull(responseDTO);
+    }
+
+    @Test
+    @DisplayName("confirmSaleTicket with non-existing Proforma should throw GenericNotFoundException")
+    void confirmSaleTicket_withNonExistingProforma_shouldThrowGenericNotFoundException() {
+        // Arrange
+        TicketRequestDTO requestDTO = new TicketRequestDTO();
+        requestDTO.setProformaId(1L);
+
+        when(proformaRepository.findByIdWithDetails(anyLong())).thenThrow(new GenericNotFoundException("Proforma not found"));
+
+        // Act & Assert
+        assertThrows(GenericNotFoundException.class, () -> saleService.confirmSaleTicket(requestDTO));
+    }
+
+    @Test
+    @DisplayName("confirmSaleTicket with used Proforma should throw IllegalStateException")
+    void confirmSaleTicket_withUsedProforma_shouldThrowIllegalStateException() {
+        // Arrange
+        TicketRequestDTO requestDTO = new TicketRequestDTO();
+        requestDTO.setProformaId(1L);
+
+        Proforma proforma = new Proforma();
+        proforma.setRegistryProforma(RegistryProformaType.USED);
+
+        when(proformaRepository.findByIdWithDetails(anyLong())).thenReturn(Optional.of(proforma));
+
+        // Act & Assert
+        assertThrows(IllegalStateException.class, () -> saleService.confirmSaleTicket(requestDTO));
     }
 
     @Test

@@ -1,8 +1,6 @@
 package com.brixton.sodimac_v2.service;
 
-import com.brixton.sodimac_v2.controller.ProductController;
 import com.brixton.sodimac_v2.data.model.Category;
-import com.brixton.sodimac_v2.data.model.Product;
 import com.brixton.sodimac_v2.data.repository.CategoryRepository;
 import com.brixton.sodimac_v2.data.repository.ProductRepository;
 import com.brixton.sodimac_v2.dto.request.ProductRequestDTO;
@@ -12,9 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
-
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,8 +25,6 @@ class ProductServiceImplTest {
 
     @Mock
     CategoryRepository categoryRepository;
-    @Mock
-    ProductController productController;
 
     @InjectMocks
     ProductServiceImpl productService;
@@ -53,7 +47,6 @@ class ProductServiceImplTest {
         ProductResponseDTO expected = new ProductResponseDTO();
         expected.setCategory("1");
 
-        //when(productRepository.save(any())).thenReturn(new Product());
         when(categoryRepository.findById(any())).thenReturn(Optional.of(category));
 
         //Act - Ejecutar el escenario de la prueba
@@ -64,42 +57,47 @@ class ProductServiceImplTest {
 
     @Test
     void createWithList() {
-        // Crear categoría simulada para evitar que falle la validación en el servicio
-        Category category = new Category();
-        // Lista de entrada
-        List<ProductRequestDTO> inputProducts = new ArrayList<>();
 
-        ProductRequestDTO product1 = new ProductRequestDTO();
-        product1.setNameProduct("product1");
-        product1.setCategory("1"); // Asignar ID de categoría
-        ProductRequestDTO product2 = new ProductRequestDTO();
-        product2.setNameProduct("product2");
-        product2.setCategory("2"); // Asignar ID de categoría
+        Category category1 = new Category();
+        category1.setId((byte) 1);
+        category1.setCategoryName("Category1");
 
-        inputProducts.add(product1);
-        inputProducts.add(product2);
+        Category category2 = new Category();
+        category2.setId((byte) 2);
+        category2.setCategoryName("Category2");
 
-        // Lista de salida esperada
-        List<ProductResponseDTO> outputProduct = new ArrayList<>();
-        ProductResponseDTO response1 = new ProductResponseDTO();
-        response1.setId(1L);
-        response1.setCategory("1");
-        ProductResponseDTO response2 = new ProductResponseDTO();
-        response2.setId(2L);
-        response2.setCategory("2");
+        ProductRequestDTO productRequest1 = new ProductRequestDTO();
+        productRequest1.setNameProduct("product1");
+        productRequest1.setCategory("1");
 
-        outputProduct.add(response1);
-        outputProduct.add(response2);
+        ProductRequestDTO productRequest2 = new ProductRequestDTO();
+        productRequest2.setNameProduct("product2");
+        productRequest2.setCategory("2");
 
-        // Simulación de búsqueda de categoría en el repositorio
-        when(categoryRepository.findById(any())).thenReturn(Optional.of(category));
-        //when(productRepository.findById(any())).thenReturn(Optional.of(new Product()));
-        when(productService.createWithList(inputProducts)).thenReturn(outputProduct);
+        List<ProductRequestDTO> inputProducts = Arrays.asList(productRequest1, productRequest2);
 
-        ResponseEntity<List<ProductResponseDTO>> actuals = productController.createWithList(inputProducts);
+        ProductResponseDTO productResponse1 = new ProductResponseDTO();
+        productResponse1.setNameProduct("product1");
+        productResponse1.setCategory("1");
 
-        assertEquals(outputProduct.size(), actuals.getBody().size());
-        assertEquals(outputProduct, actuals.getBody());
+        ProductResponseDTO productResponse2 = new ProductResponseDTO();
+        productResponse2.setNameProduct("product2");
+        productResponse2.setCategory("2");
+
+        List<ProductResponseDTO> expectedResponses = Arrays.asList(productResponse1, productResponse2);
+
+        when(categoryRepository.findById((byte) 1)).thenReturn(Optional.of(category1));
+        when(categoryRepository.findById((byte) 2)).thenReturn(Optional.of(category2));
+
+        when(productService.createProduct(productRequest1)).thenReturn(productResponse1);
+        when(productService.createProduct(productRequest2)).thenReturn(productResponse2);
+
+        // Act
+        List<ProductResponseDTO> actualResponses = productService.createWithList(inputProducts);
+
+        // Assert
+        assertNotNull(actualResponses);
+        assertEquals(expectedResponses.size(), actualResponses.size());
 
     }
 
